@@ -1,8 +1,12 @@
 package com.example.database.jdbc;
 
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.jdbc.support.JdbcUtils;
+import org.springframework.stereotype.Repository;
 
+import javax.sql.DataSource;
 import java.sql.*;
 import java.util.NoSuchElementException;
 
@@ -12,10 +16,19 @@ import java.util.NoSuchElementException;
  * 2. 커넥션 할당 및 종료 수동 설정
  * 3. 예외로 인한 커넥션 리소스 누수를 방지하는 설계
  * 4. SQL Injection 공격을 방지하기 위해, sql 작성은 바인딩 방식으로 설계
+ *
+ * v2
+ * 1. JdbcUtils 사용해서 커넥션 close
+ * 2. datasource 인터페이스 활용
+ * 3. 커넥션 풀 도입
  */
 
 @Slf4j
+@Repository
+@RequiredArgsConstructor
 public class JdbcMemberRepository {
+
+    private final DataSource dataSource;
 
     public Member save(Member member) throws SQLException {
         String sql = "insert into member(member_id, money) value (?, ?)";
@@ -103,29 +116,13 @@ public class JdbcMemberRepository {
     }
 
     private void close(Connection con, Statement stmt, ResultSet rs) {
-        if (rs != null) {
-            try {
-                rs.close();
-            } catch (SQLException e) {
-                log.info("error", e);
-            }
-        }
-        if (stmt != null) {
-            try {
-                stmt.close();
-            } catch (SQLException e) {
-                log.info("error", e);
-            }
-        }
-        if (con != null) {
-            try {
-                con.close();
-            } catch (SQLException e) {
-                log.info("error", e);
-            }
-        }
+        JdbcUtils.closeResultSet(rs);
+        JdbcUtils.closeStatement(stmt);
+        JdbcUtils.closeConnection(con);
     }
-    private Connection getConnection() {
-        return DBConnectionUtil.getConnection();
+    private Connection getConnection() throws SQLException {
+        Connection connection = dataSource.getConnection();
+        log.info("get connection={}, class={}", connection, connection.getClass());
+        return connection;
     }
 }

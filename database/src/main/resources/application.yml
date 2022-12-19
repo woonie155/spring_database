@@ -12,6 +12,8 @@ spring:
     url: jdbc:mysql://localhost:3306/spring_database?serverTimezone=Asia/Seoul
     username: admin
     password: a1234
+    hikari:
+      maximum-pool-size: 20
 
   jpa:
     hibernate:
@@ -19,4 +21,3 @@ spring:
     show-sql: true
     properties:
       hibernate.format_sql: true
-
