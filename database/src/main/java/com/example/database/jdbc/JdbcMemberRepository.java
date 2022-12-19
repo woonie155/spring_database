@@ -21,6 +21,9 @@ import java.util.NoSuchElementException;
  * 1. JdbcUtils 사용해서 커넥션 close
  * 2. datasource 인터페이스 활용
  * 3. 커넥션 풀 도입
+ *
+ * v3
+ * 1. 트랜잭션 처리
  */
 
 @Slf4j
@@ -77,6 +80,32 @@ public class JdbcMemberRepository {
         }
     }
 
+    public Member findById(Connection con, String memberId) throws SQLException {
+        String sql = "select * from member where member_id = ?";
+
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        try {
+            pstmt = con.prepareStatement(sql);
+            pstmt.setString(1, memberId);
+            rs = pstmt.executeQuery();
+            if (rs.next()) {
+                Member member = new Member();
+                member.setMemberId(rs.getString("member_id"));
+                member.setMoney(rs.getInt("money"));
+                return member;
+            } else {
+                throw new NoSuchElementException("member not found memberId=" + memberId);
+            }
+        } catch (SQLException e) {
+            log.error("findById error", e);
+            throw e;
+        } finally {
+            JdbcUtils.closeResultSet(rs);
+            JdbcUtils.closeStatement(pstmt);
+        }
+    }
+
     public void update(String memberId, int money) throws SQLException {
         String sql = "update member set money=? where member_id=?";
 
@@ -96,6 +125,24 @@ public class JdbcMemberRepository {
             close(con, pstmt, null);
         }
     }
+
+    public void update(Connection con, String memberId, int money) throws SQLException {
+        String sql = "update member set money=? where member_id=?";
+
+        PreparedStatement pstmt = null;
+        try {
+            pstmt = con.prepareStatement(sql);
+            pstmt.setInt(1, money);
+            pstmt.setString(2, memberId);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            log.error("update error", e);
+            throw e;
+        } finally {
+            JdbcUtils.closeStatement(pstmt);
+        }
+    }
+
 
     public void delete(String memberId) throws SQLException {
         String sql = "delete from member where member_id=?";
