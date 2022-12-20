@@ -1,17 +1,14 @@
 spring:
   profiles:
     active: mysql
----
-spring:
-  config:
-    activate:
-      on-profile: mysql
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/spring_database?serverTimezone=Asia/Seoul
     username: admin
     password: a1234
+    hikari:
+      maximum-pool-size: 20
 
   jpa:
     hibernate:

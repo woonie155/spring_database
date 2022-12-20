@@ -4,34 +4,41 @@ import com.example.database.jdbc.DBConnectionUtil;
 import com.example.database.jdbc.JdbcMemberService;
 import com.example.database.jdbc.Member;
 import com.example.database.jdbc.JdbcMemberRepository;
-import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.NoSuchElementException;
 
 @Slf4j
-@Transactional
+//@Transactional
 @SpringBootTest
 public class JdbcTest {
 
     @Autowired JdbcMemberRepository repository;
     @Autowired JdbcMemberService service;
 
-    @Test
-    void connection() throws SQLException {
-        Connection connection = DBConnectionUtil.getConnection();
-        Assertions.assertThat(connection).isNotNull();
-
-        Connection datasourceConnection = DBConnectionUtil.getDataSourceConnection().getConnection();
-        Assertions.assertThat(datasourceConnection).isNotNull();
+    @AfterEach
+    void after() throws SQLException {
+        repository.delete("memberA");
+        repository.delete("memberB");
+        repository.delete("ex");
     }
+
+//    @Test
+//    void connection() throws SQLException {
+//        Connection connection = DBConnectionUtil.getConnection();
+//        Assertions.assertThat(connection).isNotNull();
+//
+//        Connection datasourceConnection = DBConnectionUtil.getDataSourceConnection().getConnection();
+//        Assertions.assertThat(datasourceConnection).isNotNull();
+//    }
 
 //    @Test
 //    void crud() throws SQLException {

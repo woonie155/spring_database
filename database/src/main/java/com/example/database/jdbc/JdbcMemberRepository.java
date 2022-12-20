@@ -24,6 +24,10 @@ import java.util.NoSuchElementException;
  *
  * v3
  * 1. 트랜잭션 처리
+ * 추가) test 코드에서 @Transactional 롤백 안되는 문제 확인
+ * - 해당 코드는 getConnection 직접 사용했음
+ * - 트랜잭션 매니저이용한 커넥션관리인 경우만 같은 세션으로 인식하기 때문임
+ * - AfterEach 사용해 직접 롤백화로 해결
  */
 
 @Slf4j
